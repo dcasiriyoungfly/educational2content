@@ -1,0 +1,10 @@
+dataset/
+venv/
+__pycache__/
+*.pyc
+.env
+node_modules/
+*.h5
+*.pkl
+*.pth
+*.log
