@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ffmpeg -version)",
+      "Bash(./venv/Scripts/python.exe -c \"import tensorflow; print\\('TF:', tensorflow.__version__\\); import cv2; print\\('cv2:', cv2.__version__\\); import librosa; print\\('librosa OK'\\); import sklearn; print\\('sklearn OK'\\)\")",
+      "Bash(./venv/Scripts/pip.exe list *)"
+    ]
+  }
+}

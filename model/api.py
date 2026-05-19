@@ -16,7 +16,7 @@ jobs = {}
 
 # MODEL_PATH: local file path to use (default: best_model.h5 next to api.py)
 # MODEL_URL:  Google Drive shareable link — if set, model is downloaded on startup
-MODEL_PATH = os.environ.get('MODEL_PATH', './best_model.h5')
+MODEL_PATH = os.environ.get('MODEL_PATH', '../dataset/model/best_model.h5')
 MODEL_URL  = os.environ.get('MODEL_URL', '')
 model = None
 
