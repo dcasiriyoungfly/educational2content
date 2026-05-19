@@ -50,6 +50,11 @@ def extract_frames(video_path, max_frames=MAX_FRAMES, frame_size=FRAME_SIZE):
     return np.array(frames, dtype=np.float32)
 
 
+def _silent_audio_features(n_mels, fixed_time_steps):
+    """Return a zeroed mel spectrogram for videos with no audio track."""
+    return np.zeros((n_mels, fixed_time_steps, 1), dtype=np.float32)
+
+
 def extract_audio_features(
     video_path,
     duration=AUDIO_DURATION,
@@ -62,7 +67,8 @@ def extract_audio_features(
     Extract a mel spectrogram from the audio track of a video.
     Educational speech has very different audio patterns from music or
     crowd noise — this gives the model a second signal to learn from.
-    Returns shape (n_mels, fixed_time_steps, 1) float32, or None on failure.
+    Returns shape (n_mels, fixed_time_steps, 1) float32.
+    Falls back to a silent (zero) spectrogram if the video has no audio.
     """
     tmp_audio_path = None
     try:
@@ -77,14 +83,13 @@ def extract_audio_features(
             capture_output=True, timeout=60
         )
         if result.returncode != 0:
-            print(f"[WARN] ffmpeg failed on: {video_path}")
-            print(f"       {result.stderr.decode('utf-8', errors='ignore')[:300]}")
-            return None
+            print(f"[WARN] ffmpeg could not extract audio from: {video_path} — using silent fallback")
+            return _silent_audio_features(n_mels, fixed_time_steps)
 
         audio, _ = librosa.load(tmp_audio_path, sr=sr, mono=True)
         if len(audio) == 0:
-            print(f"[WARN] Empty audio in: {video_path}")
-            return None
+            print(f"[WARN] Empty audio in: {video_path} — using silent fallback")
+            return _silent_audio_features(n_mels, fixed_time_steps)
 
         # Clip from the MIDDLE of the video — avoids misleading intros/outros
         target_samples = duration * sr
@@ -111,11 +116,11 @@ def extract_audio_features(
         return mel_norm.astype(np.float32)
 
     except subprocess.TimeoutExpired:
-        print(f"[WARN] ffmpeg timed out on: {video_path}")
-        return None
+        print(f"[WARN] ffmpeg timed out on: {video_path} — using silent fallback")
+        return _silent_audio_features(n_mels, fixed_time_steps)
     except Exception as e:
-        print(f"[WARN] Audio extraction failed for {video_path}: {e}")
-        return None
+        print(f"[WARN] Audio extraction failed for {video_path}: {e} — using silent fallback")
+        return _silent_audio_features(n_mels, fixed_time_steps)
     finally:
         if tmp_audio_path and os.path.exists(tmp_audio_path):
             os.unlink(tmp_audio_path)

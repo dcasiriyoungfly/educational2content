@@ -110,13 +110,6 @@ def process_job(job_id, temp_path, filename, mode):
             return
 
         audio = extract_audio_features(temp_path)
-        if audio is None:
-            jobs[job_id] = {
-                'status': 'failed',
-                'http_code': 500,
-                'error': 'Server could not extract audio from video.'
-            }
-            return
 
         frames_batch = np.expand_dims(frames, axis=0)
         audio_batch  = np.expand_dims(audio,  axis=0)
@@ -207,9 +200,6 @@ def process_sync():
                             'error': 'Server could not read video frames.'}), 500
 
         audio = extract_audio_features(temp_path)
-        if audio is None:
-            return jsonify({'success': False,
-                            'error': 'Server could not extract audio from video.'}), 500
 
         frames_batch = np.expand_dims(frames, axis=0)
         audio_batch  = np.expand_dims(audio,  axis=0)
